@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.bar {
+  fill: steelblue;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+</style>
+<svg class="chart"></svg>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script>
+
+var margin = {top: 20, right: 30, bottom: 30, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+// 将一个不可排序的数组按顺序转换为有规律数字
+// 例如： A - Z 是 26，假设 width 是 1000，那么 1000 / 26 = 38.46
+// 那么 A - Z 的数组会按照这个规则转换
+// ['A','B',....,'Z'] = [38.46,38.46*2,.....,38.46*26]
+// 即 x('A') = 38.46,x('B') = 38.46 * 2
+// 用于计算元素位置，不依赖文件固定排序
+var x = d3.scale.ordinal()
+    .rangeRoundBands([0, width], .1);
+
+// 把一组数据按比例转换
+// 假设 domain 为 [0,5,10]，range 为[0-10]，（0+5+10）= 15,15/3 = 5，原始数组的比例分配为 [0%,33.33%,66.66%]
+// 按照 range 为 [0 - 100] ，那么原始数组被转换成 [0,50,100]
+// 这个方法可以方便的计算表格各项所占据的长度比例灵活控制比例，不必使用固定数字显示。
+// 传统的方法如果出现 1:100000 的比例，就会出现要么表格过长，要么表格过小的情况
+var y = d3.scale.linear()
+    .range([height, 0]);
+
+// 创建一个坐标轴,位于底部（bottome)
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+// 创建一个坐标轴，位于左侧
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left").ticks(10, "%");
+
+
+var chart = d3.select(".chart")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+d3.tsv("data.tsv", type, function(error, data) {
+  x.domain(data.map(function(d) { return d.name; }));
+  y.domain([0, d3.max(data, function(d) { return d.value; })]);
+    console.log(x('A'))
+
+//   根据 x 方法包含的 domain 创建一个 X 轴
+  chart.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+//   chart.append("g")
+//       .attr("class", "y axis")
+//       .call(yAxis);
+
+chart.append("g")
+    .attr("class", "y axis")
+    .call(yAxis)
+  .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 6)
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("Frequency");
+
+  chart.selectAll(".bar")
+      .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d.name); })
+      .attr("y", function(d) { return y(d.value); })
+      .attr("height", function(d) { return height - y(d.value); })
+      .attr("width", x.rangeBand());
+});
+
+function type(d) {
+  d.value = +d.value; // coerce to number
+  return d;
+}
+
+</script>
