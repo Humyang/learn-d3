@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.chart rect {
+  fill: steelblue;
+}
+
+.chart text {
+  fill: black;
+  font: 10px sans-serif;
+  text-anchor: middle;
+}
+body{
+    margin:0;
+}
+</style>
+<svg class="chart"></svg>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script>
+
+var margin = 10
+
+var width = 960 - margin,
+    height = 500 - margin;
+
+
+
+var x = d3.scale.linear()
+    .range([0, width]).domain([20,0]);
+
+var y = d3.scale.ordinal()
+        .rangeRoundBands([0,height],0.1)
+
+
+var chart = d3.select(".chart")
+    .attr("width", width)
+    .attr("height", height);
+
+var format = d3.format(".1%")
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("top")
+    .tickSize(height)
+    .tickFormat(format);
+    // .orient("bottom");
+
+// 创建一个坐标轴，位于左侧
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
+
+d3.csv("/5.tsv", type, function(error, data) {
+    let sortdata = data.sort(function(a,b){ return (b.Total*1) - (a.Total*1)})
+    
+    sortdata = sortdata.slice(0,10)
+
+    x = x.domain([0,d3.max(sortdata,function(d){
+        return d.Total*1
+    })])
+    y.domain(sortdata.map(function(item){
+        return item.Total * 1
+    }))
+
+    chart.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(10,20)")
+      .call(xAxis);
+
+
+    
+    let rect = chart.selectAll('rect').data(sortdata)
+
+    rect.enter().append('rect').attr('x','0').attr('y',function(d,i){
+        return y(d.Total*1)+10+"px"
+    }).attr('width',function(d,i){
+        return x(d.Total*1)+"px"
+    }).attr('height',y.rangeBand())
+
+});
+function type(d){
+    return d
+}
+
+</script>

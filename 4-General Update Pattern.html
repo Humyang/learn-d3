@@ -46,7 +46,7 @@ function update(data){
 
 
   var text = svg.selectAll('text')
-  .data(data,function(d){return d})
+  .data(data,function(d){console.log(d);return d})
   
   
   text.transition(t)
