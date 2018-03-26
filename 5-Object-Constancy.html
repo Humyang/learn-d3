@@ -168,13 +168,14 @@
 
         
         // console.log(sortdata.length)
-        let rect = contentChart.selectAll('rect').data(sortdata,function(d){
+        let rect = contentChart.selectAll('rect').data(sortdata,function(d,i){
             // console.log(d)
             // console.log(d.State)
+            console.log(i)
             return d.State
         })
         
-        rect.exit().remove()
+        
         
 
         rect.enter().append('rect').attr('x', '0').attr('y', function (d, i) {
@@ -183,7 +184,7 @@
             return x(d[selected] * 1) + "px"
         }).attr('height', y.rangeBand())
 
-        
+        rect.exit().remove()
     }
     function type(d) {
         return d
