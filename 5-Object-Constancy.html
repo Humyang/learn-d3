@@ -1,85 +1,192 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <style>
+    .chart rect {
+        fill: steelblue;
+    }
 
-.chart rect {
-  fill: steelblue;
-}
+    .chart text {
+        fill: black;
+        font: 10px sans-serif;
+        text-anchor: middle;
+    }
 
-.chart text {
-  fill: black;
-  font: 10px sans-serif;
-  text-anchor: middle;
-}
-body{
-    margin:0;
-}
+    body {
+        margin: 0;
+    }
 </style>
 <svg class="chart"></svg>
+<select name="" id="select">
+</select>
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script>
 
-var margin = 10
+    var eSelect = document.getElementById("select")
+    eSelect.addEventListener('change',function(event){
+        // console.log(event)
+        selected = this.value
+        update()
+    })
 
-var width = 960 - margin,
-    height = 500 - margin;
+    var margin = {
+        top:10,
+        right:10,
+        bottom:10,
+        left:10
+    }
+
+    var width = 960,
+        height = 500;
+
+    var contentWidth = 960 - margin.left - margin.right
+    var contentHeight = 500 - margin.top - margin.bottom
 
 
-年龄
-var x = d3.scale.linear()
-    .range([0, width]).domain([10,0]);
+    //x 轴比例平均分布
+    var x = d3.scale.linear()
+        .range([0, contentWidth]).domain([10, 0]);
 
-var y = d3.scale.ordinal()
-        .rangeRoundBands([0,height],0.1)
+    // y 轴平均分布
+    var y = d3.scale.ordinal()
+        .rangeRoundBands([0, contentHeight], 0.1)
 
+    //
+    var chart = d3.select(".chart")
+        .attr("width", width)
+        .attr("height", height)
 
-var chart = d3.select(".chart")
-    .attr("width", width)
-    .attr("height", height);
+        // .attr("translate("+margin.left+","+margin.top+")")
+        
+    // 图表内容
+    var contentChart = chart.append('g')
+    .attr('width', contentWidth)
+    .attr('height', contentHeight)
 
-var format = d3.format(".1%")
-var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("top")
-    .tickSize(height)
-    .tickFormat(format);
-    // .orient("bottom");
+    contentChart.attr('transform', "translate(40,20)")
 
-// 创建一个坐标轴，位于左侧
-var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left");
+    chart.attr("transform","translate("+margin.left+","+margin.top+")")
+    // chart.attr("translate(10,"+margin.top+")")
 
-d3.csv("/5.tsv", type, function(error, data) {
-    let sortdata = data.sort(function(a,b){ return (b.Total*1) - (a.Total*1)})
+    var format = d3.format(".1%")
+
+    // 使用 d3 的 API 生成 y 轴
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("top")
+        // .tickSize(contentWidth)
+        // .tickFormat(format);
+
+    // 使用 d3 的 API 生成 y 轴
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left");
+
+    // 设置 select 显示
+    let select = d3.select('select')
+    let select_option = []
+    let selectIsEmpty = true
+    let selected = "5 to 13 Years"
+    // 设置当前显示字段
+    let rawData = {}
+
     
-    sortdata = sortdata.slice(0,10)
 
-    x = x.domain([0,d3.max(sortdata,function(d){
-        return d.Total*1
-    })])
-    y.domain(sortdata.map(function(item){
-        return item.Total * 1
-    }))
+    d3.csv("/5.tsv", type, function (error, data) {
+        
 
-    chart.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(10,20)")
-      .call(xAxis);
+        // 将数值转换成比率
+        for (item of data) {
+            for (i of Object.keys(item)) {
+                let total = item.Total
+                if (i != "Total" && i != "State") {
 
+                    let value = item[i]
+                    let newValue = value / total
 
-    
-    let rect = chart.selectAll('rect').data(sortdata)
+                    item[i] = newValue
+                    if (selectIsEmpty) {
+                        select_option.push(i)
+                    }
+                }
+            }
+            selectIsEmpty = false
+        }
+        rawData = data
+        // console.log(select_option)
+        // console.log(select)
 
-    rect.enter().append('rect').attr('x','0').attr('y',function(d,i){
-        return y(d.Total*1)+10+"px"
-    }).attr('width',function(d,i){
-        return x(d.Total*1)+"px"
-    }).attr('height',y.rangeBand())
+        select.selectAll('option')
+            .data(select_option)
+            .enter()
+            .append('option')
+            .attr('value', function (d) { return d })
+            .text(function (d) {
+                return d
+            })
 
-});
-function type(d){
-    return d
-}
+        // console.log(data)
+
+        // 提取数据列表
+        // let list = data.map((item)=>{
+        //     return item[selected]
+        // })
+        // console.log(list)
+        
+        // console.log(sortdata)
+        update()
+        
+
+        
+
+        
+
+    });
+    function update(){
+        
+        sortdata = rawData.sort(function (a, b) { return b[selected] - a[selected] })
+        sortdata = sortdata.slice(0, 10)
+        // console.log(selected)
+        // console.log(sortdata)
+        x = x.domain([0, d3.max(sortdata, function (d) {
+            // console.log(d[selected] * 1)
+            return d[selected] * 1
+        })])
+        y.domain(sortdata.map(function (item) {
+            // console.log(item)
+            return item.State
+        }))
+
+        contentChart.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate("+0+",20)")
+            .call(xAxis);
+
+        contentChart.append("g")
+            .attr("class", "y axis")
+            // .attr("transform", "translate("+0+",20)")
+            .call(yAxis);
+
+        
+        // console.log(sortdata.length)
+        let rect = contentChart.selectAll('rect').data(sortdata,function(d){
+            // console.log(d)
+            // console.log(d.State)
+            return d.State
+        })
+        
+        rect.exit().remove()
+        
+
+        rect.enter().append('rect').attr('x', '0').attr('y', function (d, i) {
+            return y(d['State']) + 10 + "px"
+        }).attr('width', function (d, i) {
+            return x(d[selected] * 1) + "px"
+        }).attr('height', y.rangeBand())
+
+        
+    }
+    function type(d) {
+        return d
+    }
 
 </script>
