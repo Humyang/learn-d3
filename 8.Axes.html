@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+    .chart rect {
+        fill: steelblue;
+    }
+
+    .chart text {
+        fill: black;
+        font: 10px sans-serif;
+        text-anchor: middle;
+    }
+
+    body {
+        margin: 0;
+    }
+</style>
+<svg ></svg>
+<script src="http://d3js.org/d3.v4.min.js" charset="utf-8"></script>
+<script>
+let data = [4,8,15,16,23,42]
+let width = 300;
+
+// 生成一个方法，传入值，输出对应值（这个对应值根据数据集的比例生成）
+// x(42) = 300 x(20)=142.85
+var x = d3.scaleLinear()
+    .domain([0, d3.max(data)]) // 有效数据范围（传值范围）
+    .range([0, width]);//实际的显示范围（用于实际转换）
+
+
+
+var axis = d3.axisLeft(x);
+
+d3.select("body")
+.append("svg")
+    .attr("width", 1440)
+    .attr("height", 300)
+    .style("margin-left", 30)
+    .append("g")
+    .attr("transform", "translate(30,30)")
+    .call(axis)
+
+</script>
