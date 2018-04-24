@@ -13,7 +13,9 @@
         font: 10px sans-serif;
         text-anchor: middle;
     }
-
+    rect.handle {
+        fill: #5d5b5b;
+    }
     body {
         margin: 0;
     }
@@ -28,7 +30,7 @@
 
 svg.append("g")
     .attr("class", "brush")
-    .call(d3.brush().on("brush", brushed));
+    .call(d3.brush().handleSize(1).on("brush", brushed));
 
 function brushed(){}
     }
