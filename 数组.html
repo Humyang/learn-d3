@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <!-- <script src="https://d3js.org/d3.v4.min.js"></script> -->
+    
+    <script src="./d3/d3.min.js"></script>
+    <title>数组</title>
+    <style>
+    body{
+        background: #ddd;
+    }
+    .board{
+        background: white;
+        display: inline-block;
+    }
+    </style>
+</head>
+<body>
+    <div class="board">
+        <p>Array.concat</p>
+        <svg class="svg1"></svg>
+        <svg class="svg2"></svg>
+    </div>
+    <script>
+        window.onload=function(){
+            // concat
+            let concatA = [1,2,3]
+            let concatB = [4,5,6]
+
+            var svg1 = d3.select('svg.svg1')
+            var svg2 = d3.select('svg.svg2')
+            var width = "400px"
+            var height = "60px"
+
+            svg1.attr("width",width).attr("height",height)
+            
+            svg2.attr("width",width).attr("height",height)
+        //    alert(123)
+        var cA = svg1.selectAll('circle').data(concatA,function(d){return d}).attr("fill","#2196F3")
+        cA.enter()
+                    .append('circle')
+                    .attr('class','enter')
+                    .attr('fill','green')
+                    .attr('cy','30')
+                    .attr('r','20')
+                    .attr('y','0')
+                    .style("fill-opacity", 1e-6)
+                    .attr("dy","50px")
+                    .style("fill-opacity", 1)
+                    .attr('cx',function(d,i){  return 50+i*60})
+                    .text(function(d){return d})
+           update()
+            function update(){
+                cA = svg1.selectAll('circle').data(concatA,function(d){return d}).attr("fill","#2196F3")
+                let t = d3.transition()
+                .duration(750);
+                cA.exit().remove()
+                cA.enter()
+                    .append('circle')
+                    .attr('class','enter')
+                    .attr('fill','green')
+                    .attr('cy','30')
+                    .attr('r','20')
+                    .attr('y','0')
+                    .style("fill-opacity", 1e-6)
+                    .transition(t)
+                    .attr("dy","50px")
+                    .style("fill-opacity", 1)
+                    .attr('cx',function(d,i){  return 50+i*60})
+                    .text(function(d){return d})
+            }
+            
+            setTimeout(() => {
+                concatA = concatA.concat(concatB)
+                update()
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
