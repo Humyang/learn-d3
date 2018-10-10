@@ -15,69 +15,65 @@
         .board {
             background: white;
             display: inline-block;
+            padding: 25px;
+        }
+        .board code {
+            background-color: #b3e677;
+            padding: 5px;
+        }
+        p.process {
+            background-color: #ff8980;
+            padding: 5px 0px;
         }
     </style>
 </head>
 
 <body>
     <div class="board">
-        <p>Array.concat</p>
+        <h1>Array.concat</h1>
+        <p>Array1：<code>1,2,3</code></p>
+        <p>Array2：<code>4,5,6</code></p>
+        <p class="process">Array1.concat(Array2)</p>
+        <p>Array1：<code>1,2,3,4,5,6</code></p>
         <svg class="svg1"></svg>
-        <svg class="svg2"></svg>
     </div>
     <script>
         window.onload = function () {
+            // var ele = document.getElementById("concat").getElementsByTagName('code')[0]
+            
+
             // concat
             let concatA = [1, 2, 3]
             let concatB = [4, 5, 6]
-
+            // ele.innerText = concatA
             var svg1 = d3.select('svg.svg1')
-            var svg2 = d3.select('svg.svg2')
             var width = "400px"
             var height = "60px"
 
-            svg1.attr("width", width).attr("height", height)
-
-            // svg2.attr("width", width).attr("height", height)
-            // var g = svg1.selectAll('g').data(concatA, function (d) { return d }).attr("fill", "#2196F3").enter().append('g')
-            // g.append('circle')
-            //     .attr('class', 'enter')
-            //     .attr('cy', '30')
-            //     .attr('r', '20')
-            //     .style("fill-opacity", 1e-6)
-            //     .attr("dy", "50px")
-            //     .style("fill-opacity", 1)
-            //     .attr('cx', function (d, i) { return 50 + i * 60 })
-            //     .text(function (d) { return d })
-
-            // g.append('text')
-            // .text(function (d) { return d })
-            // .attr('y', '39')
-            // .attr('x', function (d, i) { return 50 + i * 55 })
-            // .attr('stroke', 'white')
-            // .attr('font-size', '22')
-                
-            update(concatA)
-            function update(data) {
-                var g=svg1.selectAll('g').data(data, function (d) { return d })
-                
-                
-                
-                g.selectAll('circle').attr("fill", "#2196F3")
-
-                
-
+            svg1.attr("width", width).attr("height", height)                
+             update(concatA,false)
+            // var g=svg1.selectAll('g').data(concatA, function (d) { return d }).enter().append('g').attr('class', 'enter')
+            function update(data,isAnimate) {
                 let t = d3.transition()
                     .duration(750);
 
-                // var g = svg1.selectAll('circle')
-                // g.attr("fill", "#2196F3").attr("class","update")
-                // g.exit().remove()
+                var g=svg1.selectAll('g').data(data, function (d) { return d })
+                
+                g.attr('class', 'enter')
+                
                 var circle = g.enter().append('g')
+                
+                circle.attr('class', 'update')
+
+                if(isAnimate){
+                    circle
+                    .attr('style', 'transform:translateY(-30px)')
+                    .transition(t)
+                    .attr('style', 'transform:translateY(0px)')
+                }
+                
 
                 circle.append('circle')
-                    .attr('class', 'enter')
-                    .attr("fill", "green")
                     .attr('cy', '-50')
                     .attr('r', '20')
                     .style("fill-opacity", 0.2)
@@ -97,7 +93,8 @@
 
             setTimeout(() => {
                 concatA = concatA.concat(concatB)
-                update(concatA)
+                update(concatA,true)
+                // ele.innerText = concatA
             }, 1000);
         }
     </script>
