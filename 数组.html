@@ -4,7 +4,8 @@
 <head>
     <meta charset="utf-8">
     <!-- <script src="https://d3js.org/d3.v4.min.js"></script> -->
-
+    
+    <script src="./jquery-3.3.1.min.js"></script>
     <script src="./d3/d3.min.js"></script>
     <title>数组</title>
     <style>
@@ -27,9 +28,8 @@
         }
     </style>
 </head>
-
-<body>
-    <div class="board">
+<script id="concat" type="text/template">
+    <div class="board concat">
         <h1>Array.concat</h1>
         <p>Array1：<code>1,2,3</code></p>
         <p>Array2：<code>4,5,6</code></p>
@@ -37,66 +37,122 @@
         <p>Array1：<code>1,2,3,4,5,6</code></p>
         <svg class="svg1"></svg>
     </div>
-    <script>
-        window.onload = function () {
-            // var ele = document.getElementById("concat").getElementsByTagName('code')[0]
-            
+</script>
+<body>
+    <div id="wrapper">
 
-            // concat
+    </div>
+    
+    <script>
+        var wrapper = $("#wrapper")
+
+        function concat(){
+            wrapper.append($("#concat").html())
+
             let concatA = [1, 2, 3]
             let concatB = [4, 5, 6]
-            // ele.innerText = concatA
-            var svg1 = d3.select('svg.svg1')
-            var width = "400px"
-            var height = "60px"
-
-            svg1.attr("width", width).attr("height", height)                
-             update(concatA,false)
-            // var g=svg1.selectAll('g').data(concatA, function (d) { return d }).enter().append('g').attr('class', 'enter')
-            function update(data,isAnimate) {
-                let t = d3.transition()
-                    .duration(750);
-
-                var g=svg1.selectAll('g').data(data, function (d) { return d })
-                
-                g.attr('class', 'enter')
-                
-                var circle = g.enter().append('g')
-                
-                circle.attr('class', 'update')
-
-                if(isAnimate){
-                    circle
-                    .attr('style', 'transform:translateY(-30px)')
-                    .transition(t)
-                    .attr('style', 'transform:translateY(0px)')
-                }
-                
-
-                circle.append('circle')
-                    .attr('cy', '-50')
-                    .attr('r', '20')
-                    .style("fill-opacity", 0.2)
-                    .attr("dy", "50px")
-                    .attr('cx', function (d, i) { return 50 + i * 60 })
-                    .attr('cy', '30')
-                    .style("fill-opacity", 1)
-                    .text(function (d) { return d })
-                
-                circle.append('text')
-                    .text(function (d) { return d })
-                    .attr('y', '39')
-                    .attr('x', function (d, i) { return 50 + i * 60 })
-                    .attr('stroke', 'white')
-                    .attr('font-size', '22')
-            }
-
+            // var svg1 = d3.select('svg.svg1')
+            renderAnimate('svg.svg1',concatA,false)
             setTimeout(() => {
                 concatA = concatA.concat(concatB)
-                update(concatA,true)
-                // ele.innerText = concatA
+                renderAnimate('svg.svg1',concatA,true)
             }, 1000);
         }
+        
+        function renderAnimate(element,data,isAnimate){
+            let t = d3.transition()
+                    .duration(750);
+            
+            var svg = d3.select(element)
+            var width = "400px"
+            var height = "60px"
+            svg.attr("width", width).attr("height", height)   
+            var g=svg.selectAll('g').data(data, function (d) { return d })
+            
+            g.attr('class', 'enter')
+            
+            var circle = g.enter().append('g')
+            
+            circle.attr('class', 'update')
+
+            if(isAnimate){
+                circle
+                .attr('style', 'transform:translateY(-30px)')
+                .transition(t)
+                .attr('style', 'transform:translateY(0px)')
+            }
+            circle.append('circle')
+                .attr('cy', '-50')
+                .attr('r', '20')
+                .style("fill-opacity", 0.2)
+                .attr("dy", "50px")
+                .attr('cx', function (d, i) { return 50 + i * 60 })
+                .attr('cy', '30')
+                .style("fill-opacity", 1)
+                .text(function (d) { return d })
+            
+            circle.append('text')
+                .text(function (d) { return d })
+                .attr('y', '39')
+                .attr('x', function (d, i) { return 50 + i * 60 })
+                .attr('stroke', 'white')
+                .attr('font-size', '22')
+        }
+        window.onload = function () {
+            concat()
+        }
+        
+        // window.onload = function () {
+        //     let concatA = [1, 2, 3]
+        //     let concatB = [4, 5, 6]
+        //     var svg1 = d3.select('svg.svg1')
+
+
+        //     var width = "400px"
+        //     var height = "60px"
+
+        //     svg1.attr("width", width).attr("height", height)                
+        //     update(concatA,false)
+        //     function update(data,isAnimate) {
+        //         let t = d3.transition()
+        //             .duration(750);
+
+        //         var g=svg1.selectAll('g').data(data, function (d) { return d })
+                
+        //         g.attr('class', 'enter')
+                
+        //         var circle = g.enter().append('g')
+                
+        //         circle.attr('class', 'update')
+
+        //         if(isAnimate){
+        //             circle
+        //             .attr('style', 'transform:translateY(-30px)')
+        //             .transition(t)
+        //             .attr('style', 'transform:translateY(0px)')
+        //         }
+        //         circle.append('circle')
+        //             .attr('cy', '-50')
+        //             .attr('r', '20')
+        //             .style("fill-opacity", 0.2)
+        //             .attr("dy", "50px")
+        //             .attr('cx', function (d, i) { return 50 + i * 60 })
+        //             .attr('cy', '30')
+        //             .style("fill-opacity", 1)
+        //             .text(function (d) { return d })
+                
+        //         circle.append('text')
+        //             .text(function (d) { return d })
+        //             .attr('y', '39')
+        //             .attr('x', function (d, i) { return 50 + i * 60 })
+        //             .attr('stroke', 'white')
+        //             .attr('font-size', '22')
+        //     }
+        //     setTimeout(() => {
+        //         concatA = concatA.concat(concatB)
+        //         update(concatA,true)
+        //     }, 1000);
+        // }
     </script>
 </body>
 
