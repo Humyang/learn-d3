@@ -30,7 +30,17 @@
 </head>
 <script id="concat" type="text/template">
     <div class="board concat">
-        <h1>Array.concat</h1>
+        <h1>Array.prototype.concat</h1>
+        <p>Array1：<code>1,2,3</code></p>
+        <p>Array2：<code>4,5,6</code></p>
+        <p class="process">Array1.concat(Array2)</p>
+        <p>Array1：<code>1,2,3,4,5,6</code></p>
+        <svg class="svg1"></svg>
+    </div>
+</script>
+<script id="copyWithin" type="text/template">
+    <div class="board copyWithin">
+        <h1>Array.prototype.copyWithin</h1>
         <p>Array1：<code>1,2,3</code></p>
         <p>Array2：<code>4,5,6</code></p>
         <p class="process">Array1.concat(Array2)</p>
@@ -51,11 +61,23 @@
 
             let concatA = [1, 2, 3]
             let concatB = [4, 5, 6]
-            // var svg1 = d3.select('svg.svg1')
-            renderAnimate('svg.svg1',concatA,false)
+            renderAnimate('.concat svg.svg1',concatA,false)
             setTimeout(() => {
                 concatA = concatA.concat(concatB)
-                renderAnimate('svg.svg1',concatA,true)
+                renderAnimate('.concat svg.svg1',concatA,true)
+            }, 1000);
+        }
+        
+        function copyWithin(){
+            wrapper.append($("#copyWithin").html())
+
+            let concatA = [1, 2,3,4,5,6]
+            // let concatB = [4, 5, 6]
+            renderAnimate('.copyWithin svg.svg1',concatA,false)
+            setTimeout(() => {
+                concatA = concatA.copyWithin(0,3)
+                console.log(concatA)
+                renderAnimate('.copyWithin svg.svg1',concatA,true)
             }, 1000);
         }
 
@@ -67,7 +89,7 @@
             var width = "400px"
             var height = "60px"
             svg.attr("width", width).attr("height", height)   
-            var g=svg.selectAll('g').data(data, function (d) { return d })
+            var g=svg.selectAll('g').data(data, function (d,i) { return d })
             
             g.attr('class', 'enter')
             
@@ -86,7 +108,7 @@
                 .attr('r', '20')
                 .style("fill-opacity", 0.2)
                 .attr("dy", "50px")
-                .attr('cx', function (d, i) { return 50 + i * 60 })
+                .attr('cx', function (d, i) {console.log(data,d,i); return 50 + i * 60 })
                 .attr('cy', '30')
                 .style("fill-opacity", 1)
                 .text(function (d) { return d })
@@ -97,9 +119,12 @@
                 .attr('x', function (d, i) { return 50 + i * 60 })
                 .attr('stroke', 'white')
                 .attr('font-size', '22')
+
+            g.exit().remove()
         }
         window.onload = function () {
-            concat()
+            // concat()
+            copyWithin()
         }
         
     </script>
