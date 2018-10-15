@@ -50,6 +50,12 @@
         <p class="process">//从0开始复制,范围由 3 到4</p>
         <p>Array1：<code>4,2,3,4,5,6</code></p>
         <svg class="svg2"></svg>
+
+        <p class="process">Array1.copyWithin(0,3,4)</p>
+        <p class="process">//从0开始复制,范围由 3 到4</p>
+        <p>Array1：<code>4,2,3,4,5,6</code></p>
+        <svg class="svg3"></svg>
+
     </div>
 </script>
 <body> 
@@ -90,9 +96,28 @@
                 concatB = concatB.copyWithin(0,3,4)
                 renderAnimate(element2,concatB,true)
             }, 1000);
+
+            let concatC = {length: 5, 3: 1}
+            let element3 = '.copyWithin svg.svg3'
+            renderAnimate(element3,concatC,false)
+            setTimeout(() => {
+                // concatB = concatB.copyWithin(0,3,4)
+                [].copyWithin.call(concatC, 0, 3);
+                renderAnimate(element3,concatC,true)
+            }, 1000);
         }
 
         function renderAnimate(element,data,isAnimate){
+            function position(obj,isAnimate){
+                if(isAnimate){
+                    obj = obj.transition(t)
+                }
+                obj.attr('style', function (d, i) {return 'transform:translateX('+(50 + i * 60)+'px)' })
+            }
+            let isArray= false
+            if(Array.isArray(data)){
+                isArray = true
+            }
             let t = d3.transition()
                     .duration(750);
             
@@ -102,31 +127,38 @@
             var width = "400px"
             var height = "60px"
             svg.attr("width", width).attr("height", height)   
-            var g=svg.selectAll('g').data(data, function (d,i) { return d })
-            
-            g.attr('class', 'enter')
-            .transition(t)
-            .attr('style', function (d, i) {return 'transform:translateX('+(50 + i * 60)+'px)' })
+            var g=svg.selectAll('g').data(data, function (d,i) { return d }).attr('class', 'enter')
 
-            var circle = g.enter().append('g').attr('class', 'update')
-            .attr('style', function (d, i) {return 'transform:translateX('+(50 + i * 60)+'px)' })
+            position(g,true)
 
-            // circle
+            var wrapper = g.enter().append('g').attr('class', 'update')
+            position(wrapper)
+
             if(isAnimate){
-                circle
+                wrapper
                 .attr('style', 'transform:translateX(0px)')
-                .transition(t)
-                .attr('style', function (d, i) {return 'transform:translateX('+(50 + i * 60)+'px)' })
+                position(wrapper,true)
             }
-            circle.append('circle')
+
+
+            wrapper.append('circle')
                 .attr('r', '20')
                 .attr("dy", "50px")
                 .attr('cy', '30')
-            circle.append('text')
+            wrapper.append('text')
                 .text(function (d) { return d })
                 .attr('y', '39')
                 .attr('stroke', 'white')
                 .attr('font-size', '22')
+
+            if(isArray){
+                wrapper.append('text')
+                .text(function (d) { return d })
+                .attr('y', '39')
+                .attr('stroke', 'white')
+                .attr('font-size', '22')
+            }
+
             g.exit().remove()
         }
         
