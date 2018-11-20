@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <!-- <script src="https://d3js.org/d3.v4.min.js"></script> -->
+
+    <script src="../jquery-3.3.1.min.js"></script>
+    <script src="../d3/d3.min.js"></script>
+    <title>数组</title>
+</head>
+
+<body>
+    <svg class="svg1"></svg>
+    <script>
+        window.onload=function(){
+            var svg = d3.select('.svg1')
+            var width = "800px"
+            var height = "600px"
+            svg.attr("width", width).attr("height", height)   
+            
+            // 创建一个坐标轴,位于底部（bottome)
+            var xAxis = d3.axis()
+                .scale(x)
+                .orient("bottom");
+
+            // 创建一个坐标轴，位于左侧
+            var yAxis = d3.axis()
+                .scale(y)
+                .orient("left").ticks(10, "%");
+        }
+
+    </script>
+</body>
+
+</html> 
