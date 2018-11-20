@@ -8,6 +8,15 @@
     <script src="./vendor/jquery-3.3.1.min.js"></script>
     <script src="./vendor/d3/d3.v5.js"></script>
     <title>数组</title>
+    <style>
+g.yaxis path {
+    display: none;
+}
+
+g.yaxis line {
+    display: none;
+}
+</style>
 </head>
 
 <body>
@@ -20,7 +29,7 @@
             var svg = d3.select('.svg1').attr("width", w).attr("height", h)
             
             let averageByCount = []
-
+            let totalData = []
             d3.dsv(",", "./teams.csv", 
                 // function(d) {
                 //     return {
@@ -47,22 +56,85 @@
                 averageByCount = data
                 generation()
             });
+
+            d3.dsv(",", "./out3.csv", 
+                // function(d) {
+                //     return {
+                //         year: new Date(+d.Year, 0, 1), // convert "Year" column to Date
+                //         make: d.Make,
+                //         model: d.Model,
+                //         length: +d.Length // convert "Length" column to number
+                // };}
+            )
+            .then(function(data) {
+                // console.log(data);
+                totalData = data
+                console.log('total',data)
+                generation()
+            });
+
             function generation(){
                 // 生成底部坐标轴
                 // d3.range(
                 //     d3.min(averageByCount,function(d){return d.year}),
                 //     d3.max(averageByCount,function(d){return d.year}))
-                let scale = d3.scaleLinear()
-                .domain(
-                    [+d3.min(averageByCount,function(d){return d.year}),
-                    +d3.max(averageByCount,function(d){return d.year})])
-                .range([0+padding,w-padding])
-                let xAxis = d3.axisBottom(scale)
-                
-                console.log('min',d3.min(averageByCount,function(d){return d.year}),d3.max(averageByCount,function(d){return d.year}))
+
+                let xMax = d3.max(totalData,function(d){return d.year})
+                let xScale = d3.scaleLinear().domain([1900, xMax]).range([0+padding,w-padding])
+                let xAxis = d3.axisBottom(xScale).ticks(10)
                 svg.append('g').call(xAxis).attr('transform','translate(0,'+(h-padding)+')')
                 
+                let yMin = d3.min(totalData,function(d){return d.kpg})
+                let yMax = d3.max(totalData,function(d){return d.kpg})
+                let yScale = d3.scaleLinear().domain([0,yMax]).range([h,padding*2])
+                let yAxis = d3.axisRight(yScale).ticks(10)
+                svg.append('g').call(yAxis).attr('transform','translate('+(w-padding)+',-'+(padding*2)+')').classed('yaxis',true)
+
+                // 所有数据
+                svg.append('g')
+                .selectAll('circle')
+                .data(totalData)
+                .enter()
+                .append('circle').attr('r',3)
+                .attr('cx',function(d,i){return xScale(d.year)})
+                .attr('cy',function(d,i){return yScale(d.kpg)})
+                .style('fill','#ddd')
+                
+                // 平均数据
+                let avgData = getAverage(totalData)
+                svg.append('g')
+                .selectAll('circle')
+                .data(avgData)
+                .enter()
+                .append('circle').attr('r',3)
+                .attr('cx',function(d,i){return xScale(d.year)})
+                .attr('cy',function(d,i){return yScale(d.avg)})
+                .style('fill','#3f51b5')
+
             }
+            function getAverage(data){
+                let keys = {}
+                data.forEach(item=>{
+                    // let isContain = keys.find(s===item)
+                    // if(!keys.find(s=>s===item.year)){
+                    //     keys.push(item.year)
+                    // }
+                    let arr = keys[item.year]?keys[item.year]:[]
+                    arr.push(item.kpg)
+                    keys[item.year] = arr
+                })
+                // console.log('keys',keys)
+                // keys.forEach((d,i)=>{
+                //     console.log('keys',d,i)
+                // })
+                let res = []
+                for(i in keys){
+                    res.push({year:i,avg:d3.mean(keys[i])})
+                }
+                console.log(res)
+                return res
+            }
+            
             // d3.
             // 创建一个坐标轴,位于底部（bottome)
             // var xAxis = d3.axis()
