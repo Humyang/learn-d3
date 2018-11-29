@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <!-- <script src="https://d3js.org/d3.v4.min.js"></script> -->
+
+    <script src="./vendor/jquery-3.3.1.min.js"></script>
+    <script src="./vendor/d3/d3.v5.js"></script>
+    <title>数组</title>
+    <style>
+g.yaxis path {
+    display: none;
+}
+
+g.yaxis line {
+    display: none;
+}
+path{
+    stroke: #3f51b5;
+    stroke-width: 1px;
+    fill: none;
+    pointer-events: none;
+}
+circle.active {
+    stroke-width: 3;
+    stroke: #FFC107;
+    fill:none;
+}
+</style>
+</head>
+
+<body>
+    <svg class="svg1"></svg>
+    <script>
+        window.onload=function(){
+            var w = 950
+            var h = 540
+            let padding = 20
+            let svg = d3.select('.svg1').attr("width", w).attr("height", h)
+            let averageByCount = []
+            let totalData = []
+            let activeTeam = ""
+            d3.dsv(",", "./teams.csv", 
+                // function(d) {
+                //     return {
+                //         year: new Date(+d.Year, 0, 1), // convert "Year" column to Date
+                //         make: d.Make,
+                //         model: d.Model,
+                //         length: +d.Length // convert "Length" column to number
+                // };}
+            )
+            .then(function(data) {
+                // console.log(data);
+            });
+            d3.dsv(",", "./average-by-count.csv", 
+                // function(d) {
+                //     return {
+                //         year: new Date(+d.Year, 0, 1), // convert "Year" column to Date
+                //         make: d.Make,
+                //         model: d.Model,
+                //         length: +d.Length // convert "Length" column to number
+                // };}
+            )
+            .then(function(data) {
+                // console.log(data);
+                averageByCount = data
+                // generation()
+                d3.dsv(",", "./out3.csv", 
+                    // function(d) {
+                    //     return {
+                    //         year: new Date(+d.Year, 0, 1), // convert "Year" column to Date
+                    //         make: d.Make,
+                    //         model: d.Model,
+                    //         length: +d.Length // convert "Length" column to number
+                    // };}
+                )
+                .then(function(data) {
+                    // console.log(data);
+                    totalData = data
+                    console.log('total',data)
+                    generation()
+                });
+            });
+        }
+
+    </script>
+</body>
+
+</html> 

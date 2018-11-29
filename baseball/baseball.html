@@ -5,8 +5,8 @@
 <div class="g-main-chart"></div>
 <!-- <svg class="chart"></svg> -->
 <!-- <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script> -->
-<script src="https://static01.nyt.com/newsgraphics/2013/03/21/strikeouts/e499df91886aef061eb10983588acb400c454a59/d3.v3.min.js"></script>
-<script src="https://static01.nyt.com/newsgraphics/2013/03/21/strikeouts/e499df91886aef061eb10983588acb400c454a59/queue.v1.min.js"></script>
+<script src="./vendor/d3.v3.min.js"></script>
+<script src="./vendor/queue.v1.min.js"></script>
 <script>
     (function () {
         var formatYear = function (d) {
@@ -165,9 +165,9 @@
             .attr("transform", "translate(" + batMargin.left + "," + batMargin.top + ")");
 
         queue()
-            .defer(d3.csv, "https://static01.nyt.com/newsgraphics/2013/03/21/strikeouts/e499df91886aef061eb10983588acb400c454a59/out3.csv")
-            .defer(d3.csv, "https://static01.nyt.com/newsgraphics/2013/03/21/strikeouts/e499df91886aef061eb10983588acb400c454a59/teams.csv")
-            .defer(d3.csv, "https://static01.nyt.com/newsgraphics/2013/03/21/strikeouts/e499df91886aef061eb10983588acb400c454a59/average-by-count.csv")
+            .defer(d3.csv, "./out3.csv")
+            .defer(d3.csv, "./teams.csv")
+            .defer(d3.csv, "./average-by-count.csv")
             .await(ready)
 
         function ready(err, strikeouts, teams) {
@@ -187,7 +187,7 @@
                 d.hrpg = +d.hrpg;
                 d.league = teamByCode[d.franchise].league;
             });
-
+            // console.log('strikeouts',strikeouts)
             var leagues = d3.nest()
                 .key(function (d) {
                     return d.league;
@@ -198,6 +198,7 @@
                 .rollup(function (values) {
 
                     return {
+                        
                         // TODO rank doesn't account for ties
                         rank: values.sort(function (a, b) {
                             return b.kpg - a.kpg
@@ -210,13 +211,13 @@
                     };
                 })
                 .entries(strikeouts);
-
+            // console.log('league',leagues)
             leagues.forEach(function (league) {
                 league.values.sort(function (a, b) {
                     return b.values.lastYear - a.values.lastYear;
                 });
             });
-
+            // console.log('league',leagues)
             //
             // Strikeout Table
             //
@@ -737,23 +738,23 @@
                     });
 
                 //  adding averages on top of main scatterplot.
-                var avgContainer = container.append("g")
+                // var avgContainer = container.append("g")
 
-                avgContainer.append("path")
-                    .attr("class", "g-mean-line")
-                    .attr("d", avgLine(averageData));
+                // avgContainer.append("path")
+                //     .attr("class", "g-mean-line")
+                //     .attr("d", avgLine(averageData));
 
-                var averages = avgContainer.selectAll(".g-mean-circle")
-                    .data(averageData)
-                    .enter().append("circle")
-                    .classed("g-mean-circle", true)
-                    .attr("cx", function (d) {
-                        return x(d.key);
-                    })
-                    .attr("cy", function (d) {
-                        return y(d.values.avg);
-                    })
-                    .attr("r", r + 0.5);
+                // var averages = avgContainer.selectAll(".g-mean-circle")
+                //     .data(averageData)
+                //     .enter().append("circle")
+                //     .classed("g-mean-circle", true)
+                //     .attr("cx", function (d) {
+                //         return x(d.key);
+                //     })
+                //     .attr("cy", function (d) {
+                //         return y(d.values.avg);
+                //     })
+                //     .attr("r", r + 0.5);
 
                 // Team rollover lines
                 var teamsContainer = container.append("g");
@@ -789,7 +790,13 @@
                     .attr("cy", function (d) {
                         return y(d[attributeY]);
                     });
-
+                // console.log('voronoi',d3.geom.voronoi(data.map(function (d) {
+                //         return [x(d.year), y(d[attributeY]) + Math.random() - .5];
+                //     })),data.map(function (d) {
+                //         return [x(d.year), y(d[attributeY]) + Math.random() - .5];
+                //     }),d3.geom.voronoi(data.map(function (d) {
+                //         return [x(d.year), y(d[attributeY]) + Math.random() - .5];
+                //     })).map(bounds.clip))
                 teamsContainer.append("g")
                     .attr("class", "g-overlay")
                     .selectAll(".voronoi")
@@ -805,6 +812,8 @@
                         return d.path;
                     })
                     .on("mouseover", function (d, i) {
+                        // let t = d3.select(this)
+                        // t.style('fill','red')
                         selectValue(d.data);
                     })
                     .on("mouseout", function (d, i) {
@@ -813,6 +822,7 @@
                     .on("click", function (d, i) {
                         selectTeam(d.data.franchise);
                     });
+
 
                 var hoverLabel = teamsContainer.append("g")
                     .attr("class", "g-mean-text")
