@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <!-- <script src="https://d3js.org/d3.v4.min.js"></script> -->
+
+    <script src="./vendor/jquery-3.3.1.min.js"></script>
+    <!-- <script src="./vendor/d3/d3.v5.js"></script> -->
+    
+    <script src="./vendor/d3.v4.min.js"></script>
+    <title>数组</title>
+    <style>
+g.yaxis path {
+    display: none;
+}
+
+g.yaxis line {
+    display: none;
+}
+path{
+    /* stroke: #3f51b5; */
+    stroke-width: 1px;
+    fill: none;
+}
+path.avgline{
+    stroke: #3f51b5;
+    pointer-events: none;
+}
+.avg{
+
+    pointer-events: none;
+}
+.overlay{
+    pointer-events: all;
+}
+circle.overCircle{
+    pointer-events: none;
+    stroke-width: 3;
+    stroke: #FFC107;
+    fill:none;
+}
+</style>
+</head>
+
+<body>
+    <svg class="svg1"></svg>
+    <script>
+        window.onload=function(){
+            var w = 950
+            var h = 540
+            let padding = 20
+            let svg = d3.select('.svg1').attr("width", w).attr("height", h)
+            let averageByCount = []
+            let totalData = []
+            let activeTeam = ""
+            d3.csv("./average-by-count.csv", function(data) {
+                // console.log(data);
+                averageByCount = data
+                // generation()
+                d3.csv("./out3.csv", function(data) {
+                    totalData = data
+                    console.log('total',data)
+                    generation()
+                }
+                )
+            })
+
+            
+
+            function generation(){
+                // 生成底部坐标轴
+
+                let xMax = d3.max(totalData,function(d){return d.year})
+                let xScale = d3.scaleLinear().domain([1900, xMax]).range([0+padding,w-padding])
+                let xAxis = d3.axisBottom(xScale).ticks(10)
+                svg.append('g').call(xAxis).attr('transform','translate(0,'+(h-padding)+')')
+                
+                let yMin = d3.min(totalData,function(d){return d.kpg})
+                let yMax = d3.max(totalData,function(d){return d.kpg})
+                let yScale = d3.scaleLinear().domain([0,yMax]).range([h,padding*2])
+                let yAxis = d3.axisRight(yScale).ticks(10)
+                svg.append('g').call(yAxis).attr('transform','translate('+(w-padding)+',-'+(padding*2)+')').classed('yaxis',true)
+
+                
+                totalPoint()
+                averLine()
+                voron()
+                function voron(){
+                    let voronoi = d3.voronoi()
+                    .x(function(d){return xScale(+d.year)})
+                    .y(function(d){return yScale(+d.kpg)})
+                    .extent([[-1, -1], [w + 1, h + 1]]);
+                    let overlay = svg.append('g')
+                    overlay.classed('overlay',true)
+                    overlay.selectAll('path').data(totalData).enter().append("path")
+                        .data(voronoi.polygons(totalData))
+                        .attr("d", renderCell)
+                        .on('mouseout',function(d,i){
+                            d3.select('circle.overCircle').remove()
+                        })
+                        .on('mouseover',function(d,i){
+                                console.log(d.data,i)
+                                overPoint(d.data)
+                        })
+                        .on('click',function(d,i){
+                            clickPoint(d.data)
+                        })
+                        
+                    
+                    function renderCell(d) {
+                        return d == null ? null : "M" + d.join("L") + "Z";
+                    }
+                    function clickPoint(d){
+                        totalLine(d.histcode)
+                    }
+                    function overPoint(d){
+                        svg.append('circle').attr('r',4)
+                        .classed('overCircle',true)
+                        .attr('cx',function(){return xScale(d.year)})
+                        .attr('cy',function(){return yScale(d.kpg)})
+                        // .style('fill','red')
+                    }
+                }
+                // 平均数据的连线
+                function averLine(){
+                    // 平均数据
+                    let avgData = getAverage(totalData)
+                    let line = d3.line()
+                        .x(function(d) { return xScale(d.year); })
+                        .y(function(d) { return yScale(d.avg); });
+                    svg.append('g')
+                    .classed('avg',true)
+                    .selectAll('circle')
+                    .data(avgData)
+                    .enter()
+                    .append('circle').attr('r',3)
+                    .attr('cx',function(d,i){return xScale(d.year)})
+                    .attr('cy',function(d,i){return yScale(d.avg)})
+                    .style('fill','#3f51b5')
+                    
+                    svg.select('g.avg')
+                    .append('path')
+                    .classed('avgline',true)
+                    .attr('d',line(avgData))
+                }
+                // svg.append('g')
+                function totalPoint(){
+                    // 所有的点
+                    let allCircle = svg.append('g')
+                    let wrapG=allCircle.selectAll('g')
+                    .data(totalData)
+                    .enter()
+                    .append('g')
+
+                    wrapG.append('circle').attr('r',3)
+                    .attr('cx',function(d,i){return xScale(d.year)})
+                    .attr('cy',function(d,i){return yScale(d.kpg)})
+                    .style('fill','#ddd')
+                    
+                    
+                    
+
+                    
+                }
+                
+                function totalLine(name){
+                    
+                    svg.select('g.totaline').remove()
+                    let newarry = []
+                    totalData.forEach(item=>{
+                        if(item.histcode === name){
+                            newarry.push(item)
+                        }
+                    })
+                    let line = d3.line()
+                        .x(function(d) { return xScale(d.year); })
+                        .y(function(d) { return yScale(d.kpg); });
+                    
+                    svg.append('g')
+                    .classed('totaline',true)
+                    .append('path')
+                    .attr('d',line(newarry))
+                    .style('stroke','#FFC107')
+
+                    console.log('totalLine',newarry)
+                    svg.select('g.totaline')
+                        .selectAll('circle')
+                        .data(newarry)
+                        .enter()
+                        .append('circle').attr('r',3)
+                        .attr('cx',function(d,i){return xScale(d.year)})
+                        .attr('cy',function(d,i){return yScale(d.kpg)})
+                        .style('fill','#FFC107')
+                        
+                }
+            }
+            
+            function getAverage(data){
+                let keys = {}
+                data.forEach(item=>{
+                    let arr = keys[item.year]?keys[item.year]:[]
+                    arr.push(item.kpg)
+                    keys[item.year] = arr
+                })
+                let res = []
+                for(i in keys){
+                    res.push({year:i,avg:d3.mean(keys[i])})
+                }
+                console.log(res)
+                return res
+            }
+            
+            // d3.
+            // 创建一个坐标轴,位于底部（bottome)
+            // var xAxis = d3.axis()
+            //     .scale(x)
+            //     .orient("bottom");
+
+            // // 创建一个坐标轴，位于左侧
+            // var yAxis = d3.axis()
+            //     .scale(y)
+            //     .orient("left").ticks(10, "%");
+        }
+
+    </script>
+</body>
+
+</html> 

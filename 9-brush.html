@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+    .chart{
+        background: #ddd;
+    }
+    .chart rect {
+        fill: steelblue;
+    }
+
+    .chart text {
+        fill: black;
+        font: 10px sans-serif;
+        text-anchor: middle;
+    }
+    rect.handle {
+        fill: #5d5b5b;
+    }
+    body {
+        margin: 0;
+    }
+</style>
+<svg class="chart"></svg>
+<script src="http://d3js.org/d3.v4.min.js" charset="utf-8"></script>
+
+
+<script>
+    window.onload=function(){
+        var svg = d3.select('.chart')
+
+svg.append("g")
+    .attr("class", "brush")
+    .call(d3.brush().handleSize(1).on("brush", brushed));
+
+function brushed(){}
+    }
+
+
+</script>
